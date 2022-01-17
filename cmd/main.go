@@ -65,7 +65,7 @@ func main() {
 		level.Debug(logger).Log("db test start")
 	})
 
-	// listener on
+	// listening on
 	level.Debug(logger).Log("listener start")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		level.Debug(logger).Log("error, exit")
