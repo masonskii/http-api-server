@@ -1,16 +1,12 @@
 package main
 
 import (
-	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
+	"flag"
+	"log"
+	"main/internal/apiserver"
+
 	//"encoding/json"
-	//"fmt"
-	"net/http"
-	"os"
-	//"path/filepath"
-	//"time"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/BurntSushi/toml"
 )
 
 const (
@@ -18,31 +14,40 @@ const (
 )
 
 var (
-	listenAddress = ":8080"
-	//postAddress = "localhost:8081"
+	configPath string
 )
+
+func init() {
+	flag.StringVar(&configPath, "config-path", "configs/apiserver.toml", "path to config file")
+}
+
+//var (
+//listenAddress = ":8080"
+//postAddress = "localhost:8081"
+//)
 
 type table struct {
 	id     int
 	status string
 }
 
+/*
 func main() {
 
-	// logger init
+	logger init
 	logger := setupLogger()
 	level.Debug(logger).Log("initLog")
 
 	// handle functions
 	http.HandleFunc("/DBtest", func(res http.ResponseWriter, req *http.Request) {
-		db, err := sql.Open("mysql", "root:0608PAV2002@/FabProjects")
+		db, err := sql.Open("mysql", "root:root@/FabProjects")
 		if err != nil {
 			level.Debug(logger).Log("error", err.Error(), "db_conn")
 			os.Exit(1)
 		}
 		defer func() { _ = db.Close() }()
 		defer func() { _ = req.Body.Close() }()
-		rows, err := db.Query(reqSelect)
+		rows, err := db.Query("SELECT id, status from status")
 		if err != nil {
 			level.Debug(logger).Log("error", err.Error(), "query")
 			os.Exit(1)
@@ -76,4 +81,20 @@ func setupLogger() (logger log.Logger) {
 	logger = log.NewLogfmtLogger(os.Stdout)
 	logger = level.NewFilter(logger, level.AllowDebug())
 	return
+}
+
+*/
+func main() {
+	flag.Parse()
+	config := apiserver.NewConfig()
+	_, err := toml.DecodeFile(configPath, config)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	s := apiserver.New(config)
+	if err := s.Start(); err != nil {
+		log.Fatal(err)
+	}
 }

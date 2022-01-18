@@ -1,0 +1,12 @@
+bind_addr = ":8080"
+log_level ="debug"
+
+
+default_bind_addr=":8080"
+default_log_level="debug"
+
+[Database]
+db_driver = "mysql"
+database_name = "FabProjects"
+db_username = "root"
+db_password = "root"
