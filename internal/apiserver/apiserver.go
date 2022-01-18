@@ -1,12 +1,20 @@
 package apiserver
 
 import (
+	"database/sql"
+	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
+	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
-
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
+	"os"
 )
+
+// TestTable ...
+type table struct {
+	id     int
+	status string
+}
 
 // APIServer ...
 type APIServer struct {
@@ -50,6 +58,7 @@ func (s *APIServer) configureLogger() error {
 // ConfigureRouter ...
 func (s *APIServer) configureRouter() {
 	s.router.HandleFunc("/hello", s.HandleHello())
+	s.router.HandleFunc("/DBTest", s.DBTest())
 
 }
 
@@ -57,5 +66,37 @@ func (s *APIServer) configureRouter() {
 func (s *APIServer) HandleHello() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "Hello")
+	}
+}
+
+// DBTest ...
+func (s *APIServer) DBTest() http.HandlerFunc {
+	return func(res http.ResponseWriter, req *http.Request) {
+		db, err := sql.Open("postgres", "host=localhost dbname=restapi_dev sslmode=disable")
+		if err != nil {
+			s.logger.Fatal(err)
+			os.Exit(1)
+		}
+		defer func() { _ = db.Close() }()
+		defer func() { _ = req.Body.Close() }()
+		rows, err := db.Query("SELECT id, status from status")
+		if err != nil {
+			s.logger.Fatal(err)
+			os.Exit(1)
+		}
+		defer func() { _ = rows.Close() }()
+		statuses := []table{}
+		for rows.Next() {
+			status := table{}
+			err := rows.Scan(&status.id, &status.status)
+			if err != nil {
+				s.logger.Fatal(err)
+				os.Exit(1)
+			}
+			statuses = append(statuses, status)
+		}
+		for _, status := range statuses {
+			io.WriteString(res, string(status.id)+status.status)
+		}
 	}
 }

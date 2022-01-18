@@ -4,7 +4,6 @@ import (
 	"flag"
 	"log"
 	"main/internal/apiserver"
-
 	//"encoding/json"
 	"github.com/BurntSushi/toml"
 )
@@ -26,11 +25,6 @@ func init() {
 //postAddress = "localhost:8081"
 //)
 
-type table struct {
-	id     int
-	status string
-}
-
 /*
 func main() {
 
@@ -39,36 +33,7 @@ func main() {
 	level.Debug(logger).Log("initLog")
 
 	// handle functions
-	http.HandleFunc("/DBtest", func(res http.ResponseWriter, req *http.Request) {
-		db, err := sql.Open("mysql", "root:root@/FabProjects")
-		if err != nil {
-			level.Debug(logger).Log("error", err.Error(), "db_conn")
-			os.Exit(1)
-		}
-		defer func() { _ = db.Close() }()
-		defer func() { _ = req.Body.Close() }()
-		rows, err := db.Query("SELECT id, status from status")
-		if err != nil {
-			level.Debug(logger).Log("error", err.Error(), "query")
-			os.Exit(1)
-		}
-		defer func() { _ = rows.Close() }()
-		statuses := []table{}
-		for rows.Next() {
-			status := table{}
-			err := rows.Scan(&status.id, &status.status)
-			if err != nil {
-				level.Debug(logger).Log("error", err.Error(), "scan")
-				os.Exit(1)
-			}
-			statuses = append(statuses, status)
-		}
-		for _, status := range statuses {
-			level.Debug(logger).Log("row", status)
-		}
 
-		level.Debug(logger).Log("db test start")
-	})
 
 	// Ot dolbaeba -- dlya dolbaeba
 	level.Debug(logger).Log("listener start")
@@ -88,7 +53,6 @@ func main() {
 	flag.Parse()
 	config := apiserver.NewConfig()
 	_, err := toml.DecodeFile(configPath, config)
-
 	if err != nil {
 		log.Fatal(err)
 	}
